@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tex Orb — Unreal Stream</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #000;
+      overflow: hidden;
+    }
+
+    iframe {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      border: none;
+      background: #000;
+    }
+
+    #fail {
+      color: #ff4d4d;
+      font-family: monospace;
+      text-align: center;
+      position: absolute;
+      width: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1rem;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <iframe
+    id="ueStream"
+    src="https://your-unreal-stream.vercel.app/"
+    allow="autoplay; fullscreen; camera; microphone"
+  ></iframe>
+
+  <div id="fail">⚠️ Unable to connect to Unreal stream.</div>
+
+  <script>
+    const iframe = document.getElementById('ueStream');
+    const fail = document.getElementById('fail');
+
+    iframe.onerror = () => {
+      fail.style.display = 'block';
+    };
+  </script>
+
+</body>
+</html>
