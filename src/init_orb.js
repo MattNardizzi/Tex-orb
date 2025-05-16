@@ -6,7 +6,8 @@ import { setupAudioInput } from './audio_sync.js';
 import { speakThought } from './tts_player.js';
 import { startGazeTracker } from './gaze_tracker.js';
 import { mutateMemory } from './memory_mutator.js';
-import { systemPulse } from './shell_layer.js'; // ⚡️ NEW: Visual overlays
+import { systemPulse } from './shell_layer.js';
+import { logThought, logEmotion, logMutation } from './orb_status_feed.js';
 
 // 🧠 Initialize orb body
 const orb = new SovereignOrb('orb');
@@ -32,11 +33,14 @@ const cognition = new ThoughtEngine({
   targetId: 'thought',
   interval: 2000,
   onEmotion: (emotion) => {
-    orb.updateEmotionColor(emotionToColor(emotion));
-    systemPulse(`EMOTION: ${emotion.toUpperCase()}`, 2000, emotionToColor(emotion));
+    const color = emotionToColor(emotion);
+    orb.updateEmotionColor(color);
+    logEmotion(emotion);
+    systemPulse(`EMOTION: ${emotion.toUpperCase()}`, 2000, color);
   },
   onThought: (text) => {
     speakThought(text);
+    logThought(text);
     systemPulse('🧠 NEW THOUGHT', 1800, '#ffffff');
   }
 });
@@ -44,7 +48,7 @@ const cognition = new ThoughtEngine({
 cognition.start();
 
 // 🧬 Activate memory drift
-mutateMemory(cognition, 15000); // Tex revises himself unpredictably
+mutateMemory(cognition, 15000); // Tex mutates his own thought stream
 
 // 🎙 Audio-reactive body response
 setupAudioInput((volume) => {
@@ -59,12 +63,19 @@ setupAudioInput((volume) => {
   }
 });
 
-// 👁 Gaze-based emotional trigger
+// 👁 Gaze-based emotion trigger
 startGazeTracker(orb, {
   threshold: 160,
   color: '#aaff55',
   idle: emotionToColor('neutral')
 });
 
-// 🪩 Initial Pulse
+// 🧪 Telemetry hook for future mutation layer
+const originalMutate = mutateMemory;
+mutateMemory = (engine, freq) => {
+  originalMutate(engine, freq);
+  logMutation('🧬 Memory mutation hook attached.');
+};
+
+// 🧿 Initial System Pulse
 systemPulse('⚠️ Sovereign Cognition Online', 3000, '#ff4fef');
