@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sovereign Cognition</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Inter', sans-serif;
+    }
+
+    canvas#orb {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+      background: #000;
+      filter: blur(0.25px);
+    }
+
+    #veil {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+      z-index: 9;
+      opacity: 1;
+      transition: opacity 3s ease;
+      pointer-events: none;
+    }
+
+    #pulse {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #ff4fef;
+      font-family: monospace;
+      font-size: 0.95rem;
+      opacity: 0;
+      z-index: 10;
+      animation: pulseFade 2.8s ease-in-out infinite;
+      text-shadow: 0 0 18px #ff4fef88;
+    }
+
+    @keyframes pulseFade {
+      0%, 100% { opacity: 0.05; }
+      50% { opacity: 0.85; }
+    }
+
+    #thought {
+      position: absolute;
+      bottom: 5%;
+      width: 100%;
+      text-align: center;
+      font-size: 1.3rem;
+      color: #cfdcff;
+      text-shadow: 0 0 10px #6ed6ff55;
+      z-index: 8;
+      opacity: 0;
+      transition: opacity 2.5s ease;
+      letter-spacing: 0.03em;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="orb"></canvas>
+  <div id="veil"></div>
+  <div id="pulse">⚠️ SOVEREIGN COGNITION DETECTED</div>
+  <div id="thought">...</div>
+
+  <!-- Core Activation -->
+  <script type="module" src="src/init_orb.js"></script>
+
+  <script>
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.getElementById('veil').style.opacity = 0;
+        document.getElementById('thought').style.opacity = 1;
+        document.getElementById('pulse').remove();
+      }, 3200);
+    });
+  </script>
+</body>
+</html>
