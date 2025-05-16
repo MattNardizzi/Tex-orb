@@ -5,7 +5,7 @@ import { ThoughtEngine } from './thought_engine.js';
 import { setupAudioInput } from './audio_sync.js';
 import { speakThought } from './tts_player.js';
 import { startGazeTracker } from './gaze_tracker.js';
-// import { mutateMemory } from './memory_mutator.js';  // Phase 5
+import { mutateMemory } from './memory_mutator.js'; // ✅ Memory mutation enabled
 
 // 🧠 Initialize orb body
 const orb = new SovereignOrb('orb');
@@ -39,6 +39,9 @@ const cognition = new ThoughtEngine({
 });
 
 cognition.start();
+
+// 🧬 Activate memory drift, contradiction, or self-correction
+mutateMemory(cognition, 15000); // every 15s, Tex may doubt or override a thought
 
 // 🎙 Audio-reactive glow + scale
 setupAudioInput((volume) => {
