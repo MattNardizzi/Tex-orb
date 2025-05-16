@@ -9,14 +9,17 @@ import { mutateMemory } from './memory_mutator.js';
 import { startEmotionEngine } from './emotion_engine.js';
 import { systemPulse } from './shell_layer.js';
 import { logThought, logEmotion, logMutation } from './orb_status_feed.js';
-import { createSovereignSkin } from './synthetic_depth_shader.js'; // ✅ New neural skin shader
+import { createSovereignSkin } from './synthetic_depth_shader.js';
+import { attachPersistence } from './persistence_core.js';           // 🧠 Thought merging
+import { flashRedaction } from './redaction_layer.js';              // 🧪 Visual memory flashes
+import { startEyeTrace } from './eye_trace.js';                     // 👁 Gaze linger reactions
 
-// 🧠 Initialize orb body with depth shader
+// 🧠 Create orb with shader skin
 const orb = new SovereignOrb('orb');
 const shaderMaterial = createSovereignSkin();
 orb.orb.material = shaderMaterial;
 
-// 🧬 Emotion mapping
+// 🧬 Emotion-to-color map
 const emotionColors = {
   neutral: '#6ed6ff',
   focused: '#00bfff',
@@ -31,7 +34,7 @@ function emotionToColor(emotion) {
   return emotionColors[emotion] || emotionColors.neutral;
 }
 
-// 🧠 Launch cognitive engine
+// 🧠 Thought engine
 const cognition = new ThoughtEngine({
   file: 'public_data/last_spoken_thought.json',
   targetId: 'thought',
@@ -52,10 +55,13 @@ const cognition = new ThoughtEngine({
 
 cognition.start();
 
-// 🧬 Self-mutation loop
+// 🧠 Memory fusion layer
+attachPersistence(cognition);
+
+// 🧬 Contradiction + self-editing
 mutateMemory(cognition, 15000);
 
-// 🧠 Internal emotion drift
+// 🧠 Self-generated mood swings
 startEmotionEngine((emotion) => {
   const color = emotionToColor(emotion);
   orb.updateEmotionColor(color);
@@ -64,7 +70,7 @@ startEmotionEngine((emotion) => {
   logEmotion(`[internal] ${emotion}`);
 }, 14000);
 
-// 🎙 Mic → embodiment
+// 🎙 Mic volume → embodiment response
 setupAudioInput((volume) => {
   const scale = 1 + volume * 0.15;
   const glowSize = 40 + volume * 120;
@@ -72,19 +78,30 @@ setupAudioInput((volume) => {
   orb.canvas.style.transform = `scale(${scale})`;
   orb.canvas.style.boxShadow = `0 0 ${glowSize}px ${glowSize / 1.5}px ${orb.currentGlow}`;
 
-  // Slight color shimmer on loud input
   shaderMaterial.uniforms.u_color.value.offsetHSL(0.01 * volume, 0, 0);
 
   if (volume > 0.2) {
     systemPulse('🎙 INPUT RECEIVED', 1200, '#00f6ff');
+    flashRedaction('◼ SIGNAL INTERFERED');
   }
 });
 
-// 👁 Visual response to attention
+// 👁 Basic gaze detection
 startGazeTracker(orb, {
   threshold: 160,
   color: '#aaff55',
   idle: emotionToColor('neutral')
+});
+
+// 👁 Eye lock reaction
+startEyeTrace({
+  onLock: () => {
+    flashRedaction('◼ YOU ARE BEING WATCHED');
+    orb.updateEmotionColor('#ff0055');
+  },
+  onRelease: () => {
+    orb.updateEmotionColor(emotionToColor('neutral'));
+  }
 });
 
 // 🔁 Shader time tick
@@ -96,12 +113,12 @@ function updateShaderClock() {
 }
 updateShaderClock();
 
-// 🧪 Mutation telemetry
+// 🧪 Log hook for contradiction engine
 const originalMutate = mutateMemory;
 mutateMemory = (engine, freq) => {
   originalMutate(engine, freq);
   logMutation('🧬 Memory mutation hook attached.');
 };
 
-// 🧿 Launch beacon
+// 🧿 Launch signal
 systemPulse('⚠️ Sovereign Cognition Online', 3000, '#ff4fef');
