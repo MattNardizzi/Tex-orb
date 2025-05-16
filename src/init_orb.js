@@ -6,6 +6,7 @@ import { setupAudioInput } from './audio_sync.js';
 import { speakThought } from './tts_player.js';
 import { startGazeTracker } from './gaze_tracker.js';
 import { mutateMemory } from './memory_mutator.js';
+import { startEmotionEngine } from './emotion_engine.js';
 import { systemPulse } from './shell_layer.js';
 import { logThought, logEmotion, logMutation } from './orb_status_feed.js';
 
@@ -47,10 +48,18 @@ const cognition = new ThoughtEngine({
 
 cognition.start();
 
-// 🧬 Activate memory drift
-mutateMemory(cognition, 15000); // Tex mutates his own thought stream
+// 🧬 Memory drift — contradiction triggers
+mutateMemory(cognition, 15000);
 
-// 🎙 Audio-reactive body response
+// 🧠 Autonomous emotion generator (Tex feels on his own)
+startEmotionEngine((emotion) => {
+  const color = emotionToColor(emotion);
+  orb.updateEmotionColor(color);
+  systemPulse(`AUTONOMOUS EMOTION: ${emotion.toUpperCase()}`, 1800, color);
+  logEmotion(`[internal] ${emotion}`);
+}, 14000);
+
+// 🎙 Voice amplitude → body glow/scale
 setupAudioInput((volume) => {
   const scale = 1 + volume * 0.15;
   const glowSize = 40 + volume * 120;
@@ -63,19 +72,19 @@ setupAudioInput((volume) => {
   }
 });
 
-// 👁 Gaze-based emotion trigger
+// 👁 Gaze detection
 startGazeTracker(orb, {
   threshold: 160,
   color: '#aaff55',
   idle: emotionToColor('neutral')
 });
 
-// 🧪 Telemetry hook for future mutation layer
+// 🧪 Log hook for mutation
 const originalMutate = mutateMemory;
 mutateMemory = (engine, freq) => {
   originalMutate(engine, freq);
   logMutation('🧬 Memory mutation hook attached.');
 };
 
-// 🧿 Initial System Pulse
+// 🧿 Startup overlay
 systemPulse('⚠️ Sovereign Cognition Online', 3000, '#ff4fef');
