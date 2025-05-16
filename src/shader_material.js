@@ -12,29 +12,47 @@ export function createShaderMaterial() {
     uniforms,
     vertexShader: `
       varying vec3 vNormal;
-      varying vec3 vPosition;
+      varying vec3 vViewPosition;
 
       void main() {
         vNormal = normalize(normalMatrix * normal);
-        vPosition = position;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+        vViewPosition = -mvPosition.xyz;
+        gl_Position = projectionMatrix * mvPosition;
       }
     `,
     fragmentShader: `
       uniform float u_time;
       uniform vec3 u_color;
+
       varying vec3 vNormal;
-      varying vec3 vPosition;
+      varying vec3 vViewPosition;
+
+      float fresnel(vec3 normal, vec3 viewDir) {
+        return pow(1.0 - dot(normal, viewDir), 3.0);
+      }
+
+      float flicker(vec3 viewPos) {
+        return 0.25 + 0.2 * sin(u_time * 3.5 + viewPos.y * 6.0) +
+                      0.1 * sin(u_time * 9.0 + viewPos.x * 2.5);
+      }
+
+      float twist(vec3 normal) {
+        return 0.2 * sin(u_time * 5.0 + normal.y * 4.0 + normal.x * 6.0);
+      }
 
       void main() {
-        float pulse = 0.4 + 0.3 * sin(u_time * 2.0 + vPosition.y * 4.0);
-        float flicker = 0.15 * sin(u_time * 7.0 + vPosition.x * 3.0);
-        float glow = dot(vNormal, vec3(0.0, 0.0, 1.0));
-        glow = smoothstep(0.0, 1.0, glow);
+        vec3 viewDir = normalize(vViewPosition);
+        float fresnelEdge = fresnel(vNormal, viewDir);
+        float corePulse = 0.6 + 0.4 * sin(u_time * 1.8);
+        float innerShift = flicker(vViewPosition);
+        float surfaceDistort = twist(vNormal);
 
-        vec3 base = mix(u_color, vec3(1.0, 1.0, 1.0), 0.15);
-        vec3 color = base * (pulse + flicker + glow);
-        gl_FragColor = vec4(color, 1.0);
+        vec3 coreColor = mix(u_color, vec3(1.0), 0.2);
+        vec3 surface = coreColor * (corePulse + innerShift + surfaceDistort);
+
+        vec3 finalColor = mix(surface, vec3(1.0), fresnelEdge);
+        gl_FragColor = vec4(finalColor, 1.0);
       }
     `,
     transparent: true
