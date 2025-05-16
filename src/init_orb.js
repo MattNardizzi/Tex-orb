@@ -9,14 +9,14 @@ import { mutateMemory } from './memory_mutator.js';
 import { startEmotionEngine } from './emotion_engine.js';
 import { systemPulse } from './shell_layer.js';
 import { logThought, logEmotion, logMutation } from './orb_status_feed.js';
-import { createShaderMaterial } from './shader_material.js';
+import { createSovereignSkin } from './synthetic_depth_shader.js'; // ✅ New neural skin shader
 
-// 🧠 Initialize orb body with GLSL skin
+// 🧠 Initialize orb body with depth shader
 const orb = new SovereignOrb('orb');
-const shaderMaterial = createShaderMaterial();
-orb.orb.material = shaderMaterial; // Override skin
+const shaderMaterial = createSovereignSkin();
+orb.orb.material = shaderMaterial;
 
-// 🧬 Emotion-to-color map
+// 🧬 Emotion mapping
 const emotionColors = {
   neutral: '#6ed6ff',
   focused: '#00bfff',
@@ -31,7 +31,7 @@ function emotionToColor(emotion) {
   return emotionColors[emotion] || emotionColors.neutral;
 }
 
-// 🧠 Launch cognition engine
+// 🧠 Launch cognitive engine
 const cognition = new ThoughtEngine({
   file: 'public_data/last_spoken_thought.json',
   targetId: 'thought',
@@ -52,10 +52,10 @@ const cognition = new ThoughtEngine({
 
 cognition.start();
 
-// 🧬 Memory drift — contradiction triggers
+// 🧬 Self-mutation loop
 mutateMemory(cognition, 15000);
 
-// 🧠 Autonomous emotion generator
+// 🧠 Internal emotion drift
 startEmotionEngine((emotion) => {
   const color = emotionToColor(emotion);
   orb.updateEmotionColor(color);
@@ -64,42 +64,44 @@ startEmotionEngine((emotion) => {
   logEmotion(`[internal] ${emotion}`);
 }, 14000);
 
-// 🎙 Voice amplitude → body response
+// 🎙 Mic → embodiment
 setupAudioInput((volume) => {
   const scale = 1 + volume * 0.15;
   const glowSize = 40 + volume * 120;
 
   orb.canvas.style.transform = `scale(${scale})`;
   orb.canvas.style.boxShadow = `0 0 ${glowSize}px ${glowSize / 1.5}px ${orb.currentGlow}`;
-  shaderMaterial.uniforms.u_color.value.offsetHSL(0.005 * volume, 0, 0); // Micro color turbulence
+
+  // Slight color shimmer on loud input
+  shaderMaterial.uniforms.u_color.value.offsetHSL(0.01 * volume, 0, 0);
 
   if (volume > 0.2) {
     systemPulse('🎙 INPUT RECEIVED', 1200, '#00f6ff');
   }
 });
 
-// 👁 Gaze detection
+// 👁 Visual response to attention
 startGazeTracker(orb, {
   threshold: 160,
   color: '#aaff55',
   idle: emotionToColor('neutral')
 });
 
-// 💡 Shader time pulse
+// 🔁 Shader time tick
 function updateShaderClock() {
-  if (shaderMaterial && shaderMaterial.uniforms.u_time) {
+  if (shaderMaterial?.uniforms?.u_time) {
     shaderMaterial.uniforms.u_time.value = performance.now() * 0.001;
   }
   requestAnimationFrame(updateShaderClock);
 }
 updateShaderClock();
 
-// 🧪 Log hook for mutation
+// 🧪 Mutation telemetry
 const originalMutate = mutateMemory;
 mutateMemory = (engine, freq) => {
   originalMutate(engine, freq);
   logMutation('🧬 Memory mutation hook attached.');
 };
 
-// 🧿 System startup marker
+// 🧿 Launch beacon
 systemPulse('⚠️ Sovereign Cognition Online', 3000, '#ff4fef');
