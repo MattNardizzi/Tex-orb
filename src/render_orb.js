@@ -1,5 +1,7 @@
 // /src/render_orb.js
 
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.js';
+
 export class SovereignOrb {
   constructor(canvasId = 'orb') {
     this.canvas = document.getElementById(canvasId);
@@ -60,11 +62,9 @@ export class SovereignOrb {
     this.orb.rotation.y += 0.01;
     this.orb.rotation.x += 0.006;
 
-    // Inner breath
     const breath = 0.33 + Math.sin(t * 2.1 + Math.cos(t * 0.5)) * 0.25;
     this.material.emissiveIntensity = breath;
 
-    // Surface color glow
     this.currentGlow = this._lerpColor(this.currentGlow, this.targetGlow, 0.08);
     this.canvas.style.boxShadow = `0 0 120px 38px ${this.currentGlow}`;
     this.canvas.style.filter = `drop-shadow(0 0 30px ${this.currentGlow})`;
